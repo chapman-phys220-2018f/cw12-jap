@@ -2,7 +2,7 @@
 
 # PHYS220/MATH220/CPSC220 CW 12
 
-**Author(s):** **CHANGEME**
+**Author(s):** **Jessica, Alley, and Paul**
 
 ## Specification
 
@@ -39,4 +39,4 @@ I pledge that all the work in this repository is my own with only the following 
 
 Signed,
 
-**YOURNAMES**
+**Jessica, Alley, and Paul**
