@@ -13,38 +13,43 @@ import numpy as np
 import numba as nb
 import matplotlib.pyplot as plt
 
-@nb.jit #decorator
-def dxdt(x, y, t):
-    """returns y"""
-    return y
+@nb.jit
+def duffing(t, a, F):
+    """Motion equation or duffing oscillator - a is an array"""
+    #v = 0.25
+    #w = 1
+    d = np.array([a[1], -0.25*a[1] + a[0] - a[0]**3 + F*np.cos(t)])
+    return d #derivative of function
 
 @nb.jit
-def dydt(x, y, t, F, v, w):
-    """motion equation or duffing oscillator"""
-    dy = x - x**3 - v*y + F*(np.cos(w*t))
-    return dy
-
-@nb.jit
-def rk4(x0, y0, F, v, w, t):
+def sombrero(F, x, y, N):
     """Fourth order Runge Kutta Equation"""
-    x[0]= x0
-    x = np.zeros(t)
-    y[0]= y0
-    y = np.zeros(t)
-    dt = t[1] - t[0]
-    # ??????? t = np.arrange(0 (2*np.pi),dt)
-    for i in range(0, len(t)-1):
-        x1 = dt*dxdt(x[i], y[i], t[i])
-        y1 = dt*dydt(x[i], y[i], t[i], F, v, w)
-        x2 = dt*dxdt(x[i] + x1/2, y[i] + y1/2, t[i] + dt/2)
-        y2 = dt*dydt(x[i] + x1/2, y[i] + y1/2, t[i] + dt/2, F, v, w)
-        x3 = dt*dxdt(x[i] + x2/2, y[i] + y2/2, t[i] + dt/2)
-        y3 = dt*dydt(x[i] + x2/2, y[i] + y2/2, t[i] + dt/2, F, v, w)
-        x4 = dt*dxdt(x[i] + x3/2, y[i] + y3/2, t[i] + dt/2)
-        y4 = dt*dydt(x[i] + x3/2, y[i] + y3/2, t[i] + dt/2, F, v, w)
-        
-        x[i+1] = x[i] + ((x1 + 2)*(x2 + 2)*x3 + x4)/6
-        y[i+1] = y[i] + ((y1 + 2)*(y2 + 2)*y3 + y4)/6
-    
-    
-    
+    step = 0.001
+    t = np.arange(0, 2*np.pi*N, step)
+    #different time values
+    length = len(t)
+    time = np.zeros((length+1, 2))
+    time[0] = np.array([x, y])
+    n = 1
+
+    for n in range(length):
+        k1 = step*(duffing(t[n], time[n], F))
+        k2 = step*(duffing(t[n] + step/2, time[n] + (k1/2), F))
+        k3 = step*(duffing(t[n] + step/2, time[n] + (k2/2), F))
+        k4 = step*(duffing(t[n] + step, time[n] + k3, F))
+        time[n+1] = time[n] + ((k1 + 2*k2 + 2*k3 + k4)/6)
+    return np.array([time[:,0], time[:,1]])
+
+def line(vals, F, title):
+    plt.plot(vals[0], vals[1], color="m", label="Oscillation")
+    plt.plot(title) #differentiate graphs for various values
+    plt.legend()
+    plt.show()
+
+def scatter(vals, F, title):
+    plt.scatter(vals[0], vals[1], color="m", label="Oscillation", s=2)
+    plt.plot(title)
+    plt.legend()
+    plt.ylim((-3,3))
+    plt.xlim((-3,3))
+    plt.show()
